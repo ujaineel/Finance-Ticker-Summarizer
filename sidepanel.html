@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finance Ticker Summarizer</title>
+    <link rel="stylesheet" href="brew.css" />
+    <style>
+        body {
+            width: 340px;
+            min-height: 100vh;
+            background: #fff;
+        }
+
+        .app-header {
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+
+        .app-title {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--brew-blue);
+        }
+
+        .app-subtitle {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: 2px solid #000;
+            padding: 6px 8px;
+            font-family: var(--font-main);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--brew-blue);
+        }
+
+        .search-btn {
+            background: var(--brew-blue);
+            color: #fff;
+            border: 2px solid #000;
+            padding: 6px 12px;
+            font-family: var(--font-main);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .search-btn:hover {
+            background: #003acc;
+        }
+
+        /* Status */
+        #status {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+            min-height: 18px;
+        }
+
+        #status.error {
+            color: #cc0000;
+            font-weight: 700;
+        }
+
+        /* Result card */
+        #result-card {
+            display: none;
+        }
+
+        .ticker-header {
+            margin-bottom: 12px;
+        }
+
+        .ticker-symbol {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .ticker-name {
+            font-size: 13px;
+            color: #444;
+            margin-top: 2px;
+        }
+
+        .ticker-exchange {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 10px 0;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            margin-bottom: 12px;
+        }
+
+        .price-current {
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .price-change {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .price-change.positive { color: #008a00; }
+        .price-change.negative { color: #cc0000; }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            background: var(--brew-grey);
+            border: 2px solid #000;
+            padding: 8px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--brew-blue);
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        /* Sector tags */
+        .tags-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border: 1px solid #000;
+            padding: 2px 6px;
+        }
+
+        /* Business summary */
+        .brew-take-box {
+            margin-top: 0;
+        }
+
+        .summary-text {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+            margin-top: 6px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+            margin-top: 24px;
+            line-height: 1.5;
+        }
+
+        /* ── AI Summary of the Day ──────────────────────────────── */
+        .ai-summary-section {
+            border-top: 2px solid #000;
+            margin-top: 24px;
+            padding-top: 14px;
+        }
+
+        .ai-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .ai-date {
+            font-size: 11px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        .ai-summary-body {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        /* Skeleton shimmer */
+        @keyframes shimmer {
+            0%   { background-position: -300% 0; }
+            100% { background-position:  300% 0; }
+        }
+
+        .sk {
+            border-radius: 2px;
+            background: linear-gradient(90deg, #ebebeb 25%, #d6d6d6 50%, #ebebeb 75%);
+            background-size: 300% 100%;
+            animation: shimmer 1.6s infinite;
+        }
+
+        .sk-line       { height: 11px; }
+        .sk-line.short { width: 55%; }
+        .sk-line.mid   { width: 78%; }
+        .sk-line.full  { width: 100%; }
+
+        .sk-badge {
+            height: 20px;
+            width: 90px;
+            border-radius: 2px;
+        }
+
+        .ai-footer {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ai-coming-soon {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #aaa;
+            border: 1px solid #ddd;
+            padding: 2px 7px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-title">Finance Ticker Summarizer</div>
+        <div class="app-subtitle">Highlight a ticker or company name in any article</div>
+    </div>
+
+    <div class="search-row">
+        <input
+            type="text"
+            id="search-input"
+            class="search-input"
+            placeholder="AAPL or Apple Inc."
+            autocomplete="off"
+            spellcheck="false"
+        />
+        <button id="search-btn" class="search-btn">Go</button>
+    </div>
+
+    <div id="status"></div>
+
+    <div id="result-card">
+        <div class="ticker-header">
+            <div class="ticker-symbol" id="res-symbol"></div>
+            <div class="ticker-name" id="res-name"></div>
+            <div class="ticker-exchange" id="res-exchange"></div>
+        </div>
+
+        <div class="price-row">
+            <span class="price-current" id="res-price"></span>
+            <span class="price-change" id="res-change"></span>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-label">Market Cap</div>
+                <div class="stat-value" id="res-mktcap">—</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">P/E Ratio</div>
+                <div class="stat-value" id="res-pe">—</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">52W High</div>
+                <div class="stat-value" id="res-52h">—</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">52W Low</div>
+                <div class="stat-value" id="res-52l">—</div>
+            </div>
+        </div>
+
+        <div class="tags-row" id="res-tags"></div>
+
+        <div class="brew-take-box">
+            <div class="eyebrow">About</div>
+            <div class="summary-text" id="res-summary">No description available.</div>
+        </div>
+    </div>
+
+    <p class="hint" id="hint">Highlight a ticker (e.g. <strong>TSLA</strong>) or company name in any article, then open this panel.</p>
+
+    <!-- ── AI Summary of the Day ───────────────────────────────────────── -->
+    <div class="ai-summary-section">
+        <div class="ai-summary-header">
+            <span class="eyebrow">AI Summary of the Day</span>
+            <span class="ai-date" id="ai-date"></span>
+        </div>
+
+        <div class="ai-summary-body">
+            <!-- Headline skeleton -->
+            <div class="sk sk-line full"></div>
+            <div class="sk sk-line mid"></div>
+
+            <!-- Body copy skeleton -->
+            <div class="sk sk-line full" style="margin-top:4px"></div>
+            <div class="sk sk-line full"></div>
+            <div class="sk sk-line full"></div>
+            <div class="sk sk-line short"></div>
+
+            <!-- Tag badges skeleton -->
+            <div style="display:flex; gap:6px; margin-top:6px">
+                <div class="sk sk-badge"></div>
+                <div class="sk sk-badge" style="width:70px"></div>
+            </div>
+        </div>
+
+        <div class="ai-footer">
+            <span class="ai-coming-soon">Coming soon</span>
+        </div>
+    </div>
+
+    <script src="sidepanel.js"></script>
+</body>
+</html>
