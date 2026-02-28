@@ -16,18 +16,22 @@
         "extension_pages": "script-src 'self'; object-src 'self';"
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "scripts/background.js"
     },
     "side_panel": {
-        "default_path": "sidepanel.html"
+        "default_path": "scripts/sidepanel.html"
     },
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": ["content.js"]
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "scripts/content.js"
+            ]
         }
     ],
     "action": {
-        "default_icon": "finance_extensions.png"
+        "default_icon": "images/finance_extensions.png"
     }
 }
