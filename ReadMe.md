@@ -10,3 +10,5 @@ To load this extension in development mode, do this:
 3. Click "Load unpacked" in the top left corner
 4. Select the folder containing the extension files
 5. The extension will be loaded and you can use it
+
+Inspired by an idea of what a hackathon project could look like, I created this extension. It is a simple extension that can be used to get the stock data of a company or a ticker symbol. It uses the Yahoo Finance API to get the stock data. It also has a feature to get the summary of the stock data of a company or a ticker symbol (WIP).
