@@ -47,11 +47,11 @@ function showResult(data) {
     }
 
     document.getElementById('res-mktcap').textContent = formatLargeNumber(price?.marketCap?.raw);
-    document.getElementById('res-pe').textContent     = defaultKeyStatistics?.trailingPE?.fmt ?? '—';
-    document.getElementById('res-52h').textContent    = defaultKeyStatistics?.['52WeekHigh']?.fmt
+    document.getElementById('res-pe').textContent     = defaultKeyStatistics?.forwardPE?.fmt ?? '—';
+    document.getElementById('res-52h-change').textContent    = defaultKeyStatistics?.['52WeekChange']?.fmt
         ?? defaultKeyStatistics?.fiftyTwoWeekHigh?.fmt ?? '—';
-    document.getElementById('res-52l').textContent    = defaultKeyStatistics?.['52WeekLow']?.fmt
-        ?? defaultKeyStatistics?.fiftyTwoWeekLow?.fmt ?? '—';
+    document.getElementById('res-float-shares').textContent    = defaultKeyStatistics?.['floatShares']?.fmt
+        ?? '—';
 
     const tagsEl = document.getElementById('res-tags');
     tagsEl.innerHTML = '';
@@ -111,6 +111,7 @@ async function resolveSymbol(query, signal) {
     const quotes = json.quotes ?? [];
     const hit    = quotes.find(q => q.quoteType === 'EQUITY' || q.quoteType === 'ETF');
     if (!hit) throw new Error(`No stock found for "${query}"`);
+
     return hit.symbol;
 }
 
@@ -128,6 +129,7 @@ async function fetchQuote(symbol, { retried = false, signal } = {}) {
 
     const json   = await resp.json();
     const result = json.quoteSummary?.result?.[0];
+    console.log(result);
     if (!result) throw new Error(`No data returned for symbol "${symbol}"`);
     return result;
 }
