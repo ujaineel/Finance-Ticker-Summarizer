@@ -14,3 +14,8 @@ To load this extension in development mode, do this:
 Inspired by an idea of what a hackathon project could look like, I created this extension. It is a simple extension that can be used to get the stock data of a company or a ticker symbol. It uses the Yahoo Finance API to get the stock data. It also has a feature to get the summary of the stock data of a company or a ticker symbol (WIP).
 
 Tools used: Cloudflare workers, Gemini, Yahoo Finance
+
+Check video here 
+
+https://github.com/user-attachments/assets/aa02d0bb-6ee3-46ee-a464-fd73b8b74ec4
+
